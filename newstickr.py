@@ -1,16 +1,24 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import time
 from PyQt4 import QtGui, QtCore
 
+
+
 class Config:
 	SampleText = '<a href="http://www.twitter.com/">Twitter!</a> +++ Laufschrift Newsticker +++ Lorem ipsum Newstickerum +++ tick tick tack +++ fooooooo +++ Erdbeben +++ Dinosaurier +++ Taliban +++ Katastrophe +++ '
 	speed = 0.1
+	accel = 20
 	iconName = 'newstickr.xpm'
 	numTagLines = 3
 	tagLines = ['', '', '']
 	vspace = 30
+	width = 800
+	browser = 'chromium-browser'
+
+
 
 class NTSettingsDialog(QtGui.QDialog):
 	def __init__(self):
@@ -96,17 +104,63 @@ class UpdateThread(QtCore.QThread):
 
 
 
+class NewsLabel(QtGui.QLabel):
+	def __init__(self, parent=None):
+		QtGui.QLabel.__init__(self, parent)
+		self.url = ''
+	
+	def mousePressEvent(self, event):
+		os.system(Config.browser + ' ' + self.url)
+
+
+
+
+class NewsTickrMessage(QtGui.QWidget):
+	def __init__(self, parent=None):
+		QtGui.QWidget.__init__(self, parent)
+		self.newsLabels = []
+		self.sizeInPixels = 0
+
+	def addNews(self, text, url):
+		label = NewsLabel(self)
+		htmlText = '<qt>'
+		if url != '':
+			htmlText += '<a href="' + url + '">'
+		htmlText += text
+		if url != '':
+			htmlText += '</a>'
+		htmlText += '</qt>'
+		label.setText(htmlText)
+		label.url = url
+		self.newsLabels.append(label)
+	
+	def clearNews(self):
+		for item in self.newsLabels:
+			item.hide()
+			item.destroy()
+
+	def buildLabel(self):
+		self.sizeInPixels = 0
+		for label in self.newsLabels:
+			label.setGeometry(self.sizeInPixels, 0, len(label.text())*3, label.height())
+			self.sizeInPixels += label.width() + 30
+		return self.sizeInPixels 
+	
+
+
+
 class NewstickrWindow(QtGui.QWidget):
 	def __init__(self, width, height, parent=None):
 		QtGui.QWidget.__init__(self, parent)
 		self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.X11BypassWindowManagerHint)
 		self.setGeometry(0, height-30, width, 30)
 		self.setWindowTitle('Newstickr')
-		self.label = QtGui.QLabel(self)
-		self.updateThread = UpdateThread(self.label)
+		self.newsLabels = []
+		self.ticks = 0
+		self.message = NewsTickrMessage(self)
+		self.updateThread = UpdateThread(self.message)
 		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('rotated()'), self, QtCore.SLOT('update()'))
 		QtCore.QObject.connect(self, QtCore.SIGNAL('rotating(bool)'), self.updateThread, QtCore.SLOT('setRotating(bool)'))
-		self.newsLabels = []
 		self.updateThread.start()
 	
 	#def mousePressEvent(self, event):
@@ -114,7 +168,7 @@ class NewstickrWindow(QtGui.QWidget):
 
 	def resizeEvent(self, event):
 		geo = self.geometry()
-		self.label.setGeometry(0, 0, geo.width(), geo.height())
+		self.message.setGeometry(0, 0, geo.width(), geo.height())
 
 	@QtCore.pyqtSignature('setText(QString)')
 	def setText(self, aString):
@@ -131,26 +185,24 @@ class NewstickrWindow(QtGui.QWidget):
 	def leaveEvent(self, event):
 		self.emit(QtCore.SIGNAL('rotating(bool)'), True)
 
-	def clearNews(self):
-		for item in self.newsLabels:
-			item.hide()
-			item.destroy()
-
 	def addNews(self, text, url):
-		label = QtGui.QLabel(self)
-		htmlText = '<qt>'
-		if url != '':
-			htmlText += '<a href="' + url + '">'
-		htmlText += text
-		if url != '':
-			htmlText += '</a>'
-		htmlText += '</qt>'
-		label.setText(htmlText)
-		self.update()
+		self.message.addNews(text, url)
+
+	def clearNews(self):
+		self.message = NewsTickrMessage()
+
+	def buildLabel(self):
+		self.labelSize = self.message.buildLabel()
 
 	@QtCore.pyqtSignature('update()')
 	def update(self):
-		print 'update'
+		self.message.show()
+		self.ticks += 1
+		newX = Config.width - self.ticks * Config.accel
+		self.message.setGeometry(newX, 0, self.message.width(), self.message.height())
+		if newX < -self.labelSize:
+			self.ticks = 0
+			
 			
 
 
@@ -159,9 +211,17 @@ class NewstickrWindow(QtGui.QWidget):
 app = QtGui.QApplication(sys.argv)
 
 desktop = app.desktop()
+Config.width = desktop.width()
 
 newstickr = NewstickrWindow(desktop.width(), desktop.height())
+
+newstickr.addNews('Google', 'http://www.google.com')
+newstickr.addNews('Twitter', 'http://www.twitter.com')
+newstickr.addNews('Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeryyyyyyyyyyyyy loooooooooooooooooooooooooooooooonnnnnnnnnnnnnngggggggggggggggggggggggg tteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtttttttttttttttttt', 'http://www.twitter.com')
+newstickr.addNews('Twitter', 'http://www.twitter.com')
+newstickr.buildLabel()
 newstickr.show()
+
 trayIcon = TrayIcon(QtGui.QIcon(Config.iconName), newstickr)
 trayIcon.show()
 
