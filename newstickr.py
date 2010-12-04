@@ -7,10 +7,12 @@ from PyQt4 import QtGui, QtCore
 class Config:
 	SampleText = '<a href="http://www.twitter.com/">Twitter!</a> +++ Laufschrift Newsticker +++ Lorem ipsum Newstickerum +++ tick tick tack +++ fooooooo +++ Erdbeben +++ Dinosaurier +++ Taliban +++ Katastrophe +++ '
 	speed = 0.1
+	accel = 10
 	iconName = 'newstickr.xpm'
 	numTagLines = 3
 	tagLines = ['', '', '']
 	vspace = 30
+	width = 800
 
 class NTSettingsDialog(QtGui.QDialog):
 	def __init__(self):
@@ -108,6 +110,8 @@ class NewstickrWindow(QtGui.QWidget):
 		QtCore.QObject.connect(self, QtCore.SIGNAL('rotating(bool)'), self.updateThread, QtCore.SLOT('setRotating(bool)'))
 		self.newsLabels = []
 		self.updateThread.start()
+		self.ticks = 0
+		self.sizeInPixels = Config.width
 	
 	#def mousePressEvent(self, event):
 	#	print "clicked!"
@@ -146,11 +150,24 @@ class NewstickrWindow(QtGui.QWidget):
 			htmlText += '</a>'
 		htmlText += '</qt>'
 		label.setText(htmlText)
+		self.newsLabels.append(label)
 		self.update()
 
 	@QtCore.pyqtSignature('update()')
 	def update(self):
-		print 'update'
+		x = -self.ticks * Config.accel
+		if -x > self.sizeInPixels:
+			print "-x: " + str(-x) + "; sizeInPixels = " + str(self.sizeInPixels)
+			self.ticks = 0
+		self.sizeInPixels = 0
+		for label in self.newsLabels:
+			label.setGeometry(x, 0, len(label.text())*3, label.height())
+			x += label.width() + 30
+			self.sizeInPixels += label.width() + 30
+			label.show()
+		self.ticks += 1
+		self.sizeInPixels = -x
+			
 			
 
 
@@ -159,11 +176,16 @@ class NewstickrWindow(QtGui.QWidget):
 app = QtGui.QApplication(sys.argv)
 
 desktop = app.desktop()
+Config.width = desktop.width()
 
 newstickr = NewstickrWindow(desktop.width(), desktop.height())
 newstickr.show()
 trayIcon = TrayIcon(QtGui.QIcon(Config.iconName), newstickr)
 trayIcon.show()
+newstickr.addNews('Google', 'http://www.google.com')
+newstickr.addNews('Twitter', 'http://www.twitter.com')
+newstickr.addNews('Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeryyyyyyyyyyyyy loooooooooooooooooooooooooooooooonnnnnnnnnnnnnngggggggggggggggggggggggg tteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtttttttttttttttttt', 'http://www.twitter.com')
+newstickr.addNews('Twitter', 'http://www.twitter.com')
 
 sys.exit(app.exec_())
 
