@@ -61,11 +61,13 @@ class UpdateThread(QtCore.QThread):
 		self.label = label
 		self.text = Config.SampleText
 		self.isRunning = True
+		self.isRotating = True
 
 	def run(self):
 		while self.isRunning:
 			time.sleep(Config.speed)
-			self.rotate()
+			if self.isRotating:
+				self.rotate()
 
 	def rotate(self):
 		if len(self.text) > 0:
@@ -75,6 +77,10 @@ class UpdateThread(QtCore.QThread):
 
 	def finish(self):
 		self.isRunning = False
+	
+	@QtCore.pyqtSignature('setRotating(bool)')
+	def setRotating(self, aBoolean):
+		self.isRotating = aBoolean
 
 
 class NewstickrWindow(QtGui.QWidget):
@@ -86,6 +92,7 @@ class NewstickrWindow(QtGui.QWidget):
 		self.label = QtGui.QLabel(self)
 		self.updateThread = UpdateThread(self.label)
 		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('textRotated(QString)'), self, QtCore.SLOT('setText(QString)'))
+		QtCore.QObject.connect(self, QtCore.SIGNAL('rotating(bool)'), self.updateThread, QtCore.SLOT('setRotating(bool)'))
 		self.updateThread.start()
 	
 	#def mousePressEvent(self, event):
@@ -103,6 +110,12 @@ class NewstickrWindow(QtGui.QWidget):
 		self.updateThread.finish()
 		time.sleep(0.2)
 		event.accept()
+
+	def enterEvent(self, event):
+		self.emit(QtCore.SIGNAL('rotating(bool)'), False)
+
+	def leaveEvent(self, event):
+		self.emit(QtCore.SIGNAL('rotating(bool)'), True)
 
 app = QtGui.QApplication(sys.argv)
 
