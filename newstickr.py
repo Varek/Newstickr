@@ -7,6 +7,15 @@ from PyQt4 import QtGui, QtCore
 class Config:
 	SampleText = '<a href="http://www.twitter.com/">Twitter!</a> +++ Laufschrift Newsticker +++ Lorem ipsum Newstickerum +++ tick tick tack +++ fooooooo +++ Erdbeben +++ Dinosaurier +++ Taliban +++ Katastrophe +++ '
 	speed = 0.1
+	iconName = 'newstickr.xpm'
+
+class TrayIcon(QtGui.QSystemTrayIcon):
+	def __init__(self, icon, parent=None):
+		QtGui.QSystemTrayIcon.__init__(self, icon, parent)
+		menu = QtGui.QMenu(parent)
+		exitAction = menu.addAction("Exit")
+		self.setContextMenu(menu)
+		self.connect(exitAction, QtCore.SIGNAL('triggered()'), lambda: sys.exit(0))
 
 class UpdateThread(QtCore.QThread):
 	def __init__(self, label):
@@ -37,14 +46,12 @@ class NewstickrWindow(QtGui.QWidget):
 		self.setGeometry(0, height-30, width, 30)
 		self.setWindowTitle('Newstickr')
 		self.label = QtGui.QLabel(self)
-		self.label.setGeometry(0, 0, 350, 20)
 		self.updateThread = UpdateThread(self.label)
 		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('textRotated(QString)'), self, QtCore.SLOT('setText(QString)'))
 		self.updateThread.start()
 	
 	def mousePressEvent(self, event):
 		print "clicked!"
-		self.close()
 
 	def resizeEvent(self, event):
 		geo = self.geometry()
@@ -62,8 +69,11 @@ class NewstickrWindow(QtGui.QWidget):
 app = QtGui.QApplication(sys.argv)
 
 desktop = app.desktop()
+
 newstickr = NewstickrWindow(desktop.width(), desktop.height())
 newstickr.show()
+trayIcon = TrayIcon(QtGui.QIcon(Config.iconName), newstickr)
+trayIcon.show()
 
 sys.exit(app.exec_())
 
