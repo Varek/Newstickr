@@ -23,16 +23,18 @@ class UpdateThread(QtCore.QThread):
 	def rotate(self):
 		if len(self.text) > 0:
 			self.text = self.text[1:] + self.text[0]
-		self.emit(QtCore.SIGNAL('textRotated(QString)'), self.text)
+		self.emit(QtCore.SIGNAL('textRotated(QString)'), \
+				'<qt>' + self.text + '</qt>')
 
 	def finish(self):
 		self.isRunning = False
 
+
 class NewstickrWindow(QtGui.QWidget):
-	def __init__(self, parent=None):
+	def __init__(self, width, height, parent=None):
 		QtGui.QWidget.__init__(self, parent)
-		self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
-		self.setGeometry(0, 0, 400, 30)
+		self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint | QtCore.Qt.X11BypassWindowManagerHint)
+		self.setGeometry(0, height-30, width, 30)
 		self.setWindowTitle('Newstickr')
 		self.label = QtGui.QLabel(self)
 		self.label.setGeometry(0, 0, 350, 20)
@@ -40,9 +42,9 @@ class NewstickrWindow(QtGui.QWidget):
 		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('textRotated(QString)'), self, QtCore.SLOT('setText(QString)'))
 		self.updateThread.start()
 	
-	#def mousePressEvent(self, event):
-	#	print "clicked!"
-	#	self.close()
+	def mousePressEvent(self, event):
+		print "clicked!"
+		self.close()
 
 	def resizeEvent(self, event):
 		geo = self.geometry()
@@ -59,7 +61,8 @@ class NewstickrWindow(QtGui.QWidget):
 
 app = QtGui.QApplication(sys.argv)
 
-newstickr = NewstickrWindow()
+desktop = app.desktop()
+newstickr = NewstickrWindow(desktop.width(), desktop.height())
 newstickr.show()
 
 sys.exit(app.exec_())
