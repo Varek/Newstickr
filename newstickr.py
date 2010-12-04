@@ -84,10 +84,7 @@ class UpdateThread(QtCore.QThread):
 				self.rotate()
 
 	def rotate(self):
-		if len(self.text) > 0:
-			self.text = self.text[1:] + self.text[0]
-		self.emit(QtCore.SIGNAL('textRotated(QString)'), \
-				'<qt>' + self.text + '</qt>')
+		self.emit(QtCore.SIGNAL('rotated()'))
 
 	def finish(self):
 		self.isRunning = False
@@ -107,8 +104,9 @@ class NewstickrWindow(QtGui.QWidget):
 		self.setWindowTitle('Newstickr')
 		self.label = QtGui.QLabel(self)
 		self.updateThread = UpdateThread(self.label)
-		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('textRotated(QString)'), self, QtCore.SLOT('setText(QString)'))
+		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('rotated()'), self, QtCore.SLOT('update()'))
 		QtCore.QObject.connect(self, QtCore.SIGNAL('rotating(bool)'), self.updateThread, QtCore.SLOT('setRotating(bool)'))
+		self.newsLabels = []
 		self.updateThread.start()
 	
 	#def mousePressEvent(self, event):
@@ -132,6 +130,28 @@ class NewstickrWindow(QtGui.QWidget):
 
 	def leaveEvent(self, event):
 		self.emit(QtCore.SIGNAL('rotating(bool)'), True)
+
+	def clearNews(self):
+		for item in self.newsLabels:
+			item.hide()
+			item.destroy()
+
+	def addNews(self, text, url):
+		label = QtGui.QLabel(self)
+		htmlText = '<qt>'
+		if url != '':
+			htmlText += '<a href="' + url + '">'
+		htmlText += text
+		if url != '':
+			htmlText += '</a>'
+		htmlText += '</qt>'
+		label.setText(htmlText)
+		self.update()
+
+	@QtCore.pyqtSignature('update()')
+	def update(self):
+		print 'update'
+			
 
 
 
