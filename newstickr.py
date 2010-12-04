@@ -9,6 +9,7 @@ class Config:
 	speed = 0.1
 	iconName = 'newstickr.xpm'
 	numTagLines = 3
+	tagLines = ['', '', '']
 	vspace = 30
 
 class NTSettingsDialog(QtGui.QDialog):
@@ -16,8 +17,8 @@ class NTSettingsDialog(QtGui.QDialog):
 		QtGui.QDialog.__init__(self)
 		self.setWindowTitle('Settings')
 		self.setModal(True)
-		self.tagLines = []
-		for i in range(Config.numTagLines):
+		self.textEdits = []
+		for i in range(len(Config.tagLines)):
 			self.initTagLine(i)
 		acceptButton = QtGui.QPushButton(self)
 		cancelButton = QtGui.QPushButton(self)
@@ -26,6 +27,7 @@ class NTSettingsDialog(QtGui.QDialog):
 		acceptButton.setText('OK')
 		cancelButton.setText('Cancel')
 		self.connect(cancelButton, QtCore.SIGNAL('clicked()'), lambda: self.close())
+		self.connect(acceptButton, QtCore.SIGNAL('clicked()'), lambda: self.accept())
 
 	def initTagLine(self, anInteger):
 		
@@ -34,10 +36,19 @@ class NTSettingsDialog(QtGui.QDialog):
 		label.setGeometry(0, Config.vspace * anInteger, 70, Config.vspace)
 		edit = QtGui.QTextEdit(self)
 		edit.setGeometry(100, Config.vspace * anInteger, 200, Config.vspace)
+		edit.setText(Config.tagLines[anInteger])
+		self.textEdits.append(edit)
 
 	def accept(self):
+		for line in Config.tagLines:
+			line = ''
+		i = 0
+		for edit in self.textEdits:
+			Config.tagLines[i] = edit.toPlainText()
+			i += 1
 		self.close()
 		
+
 		
 
 class TrayIcon(QtGui.QSystemTrayIcon):
@@ -54,6 +65,9 @@ class TrayIcon(QtGui.QSystemTrayIcon):
 		dialog = NTSettingsDialog()
 		dialog.show()
 		dialog.exec_()
+
+
+
 
 class UpdateThread(QtCore.QThread):
 	def __init__(self, label):
@@ -81,6 +95,8 @@ class UpdateThread(QtCore.QThread):
 	@QtCore.pyqtSignature('setRotating(bool)')
 	def setRotating(self, aBoolean):
 		self.isRotating = aBoolean
+
+
 
 
 class NewstickrWindow(QtGui.QWidget):
@@ -116,6 +132,9 @@ class NewstickrWindow(QtGui.QWidget):
 
 	def leaveEvent(self, event):
 		self.emit(QtCore.SIGNAL('rotating(bool)'), True)
+
+
+
 
 app = QtGui.QApplication(sys.argv)
 
