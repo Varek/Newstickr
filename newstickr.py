@@ -8,14 +8,52 @@ class Config:
 	SampleText = '<a href="http://www.twitter.com/">Twitter!</a> +++ Laufschrift Newsticker +++ Lorem ipsum Newstickerum +++ tick tick tack +++ fooooooo +++ Erdbeben +++ Dinosaurier +++ Taliban +++ Katastrophe +++ '
 	speed = 0.1
 	iconName = 'newstickr.xpm'
+	numTagLines = 3
+	vspace = 30
+
+class NTSettingsDialog(QtGui.QDialog):
+	def __init__(self):
+		QtGui.QDialog.__init__(self)
+		self.setWindowTitle('Settings')
+		self.setModal(True)
+		self.tagLines = []
+		for i in range(Config.numTagLines):
+			self.initTagLine(i)
+		acceptButton = QtGui.QPushButton(self)
+		cancelButton = QtGui.QPushButton(self)
+		acceptButton.setGeometry(0, Config.numTagLines * Config.vspace, 100, 30)	
+		cancelButton.setGeometry(110, Config.numTagLines * Config.vspace, 100, 30)	
+		acceptButton.setText('OK')
+		cancelButton.setText('Cancel')
+		self.connect(cancelButton, QtCore.SIGNAL('clicked()'), lambda: self.close())
+
+	def initTagLine(self, anInteger):
+		
+		label = QtGui.QLabel(self)
+		label.setText('Tag line ' + str(anInteger+1))
+		label.setGeometry(0, Config.vspace * anInteger, 70, Config.vspace)
+		edit = QtGui.QTextEdit(self)
+		edit.setGeometry(100, Config.vspace * anInteger, 200, Config.vspace)
+
+	def accept(self):
+		self.close()
+		
+		
 
 class TrayIcon(QtGui.QSystemTrayIcon):
 	def __init__(self, icon, parent=None):
 		QtGui.QSystemTrayIcon.__init__(self, icon, parent)
 		menu = QtGui.QMenu(parent)
+		confDialogAction = menu.addAction("Settings")
 		exitAction = menu.addAction("Exit")
 		self.setContextMenu(menu)
-		self.connect(exitAction, QtCore.SIGNAL('triggered()'), lambda: sys.exit(0))
+		self.connect(exitAction, QtCore.SIGNAL('triggered()'), lambda: parent.close())
+		self.connect(confDialogAction, QtCore.SIGNAL('triggered()'), lambda: self.showSettingsDialog())
+
+	def showSettingsDialog(self):
+		dialog = NTSettingsDialog()
+		dialog.show()
+		dialog.exec_()
 
 class UpdateThread(QtCore.QThread):
 	def __init__(self, label):
@@ -50,8 +88,8 @@ class NewstickrWindow(QtGui.QWidget):
 		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('textRotated(QString)'), self, QtCore.SLOT('setText(QString)'))
 		self.updateThread.start()
 	
-	def mousePressEvent(self, event):
-		print "clicked!"
+	#def mousePressEvent(self, event):
+	#	print "clicked!"
 
 	def resizeEvent(self, event):
 		geo = self.geometry()
