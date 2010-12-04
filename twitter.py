@@ -124,7 +124,7 @@ class Status(object):
     return self.geo	
     
   def GetStatusUrl(self):
-  	url = 'http://twitter.com/'# + self.user.screen_name + '/status/'+ str(self.id)
+  	return 'http://twitter.com/' + self.user.screen_name + '/status/'+ str(self.id)
 
   def GetCreatedAt(self):
     '''Get the time this status message was posted.
@@ -417,9 +417,8 @@ class Status(object):
     Returns:
       A twitter.Status instance
     '''
-    if 'user' in data:
-      user = User.NewFromJsonDict(data['user'])
-
+    if 'from_user' in data:
+      user = Api().GetUser(data['from_user'])
     else:
       user = None
     if data.get('geo',None) != None:
