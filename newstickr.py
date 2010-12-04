@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import time
 from PyQt4 import QtGui, QtCore
+
+
 
 class Config:
 	SampleText = '<a href="http://www.twitter.com/">Twitter!</a> +++ Laufschrift Newsticker +++ Lorem ipsum Newstickerum +++ tick tick tack +++ fooooooo +++ Erdbeben +++ Dinosaurier +++ Taliban +++ Katastrophe +++ '
@@ -13,6 +16,9 @@ class Config:
 	tagLines = ['', '', '']
 	vspace = 30
 	width = 800
+	browser = 'chromium-browser'
+
+
 
 class NTSettingsDialog(QtGui.QDialog):
 	def __init__(self):
@@ -96,6 +102,19 @@ class UpdateThread(QtCore.QThread):
 		self.isRotating = aBoolean
 
 
+
+
+class NewsLabel(QtGui.QLabel):
+	def __init__(self, parent=None):
+		QtGui.QLabel.__init__(self, parent)
+		self.url = ''
+	
+	def mousePressEvent(self, event):
+		os.system(Config.browser + ' ' + self.url)
+
+
+
+
 class NewsTickrMessage(QtGui.QWidget):
 	def __init__(self, parent=None):
 		QtGui.QWidget.__init__(self, parent)
@@ -103,7 +122,7 @@ class NewsTickrMessage(QtGui.QWidget):
 		self.sizeInPixels = 0
 
 	def addNews(self, text, url):
-		label = QtGui.QLabel(self)
+		label = NewsLabel(self)
 		htmlText = '<qt>'
 		if url != '':
 			htmlText += '<a href="' + url + '">'
@@ -112,6 +131,7 @@ class NewsTickrMessage(QtGui.QWidget):
 			htmlText += '</a>'
 		htmlText += '</qt>'
 		label.setText(htmlText)
+		label.url = url
 		self.newsLabels.append(label)
 	
 	def clearNews(self):
@@ -125,6 +145,8 @@ class NewsTickrMessage(QtGui.QWidget):
 			label.setGeometry(self.sizeInPixels, 0, len(label.text())*3, label.height())
 			self.sizeInPixels += label.width() + 30
 		return self.sizeInPixels 
+	
+
 
 
 class NewstickrWindow(QtGui.QWidget):
@@ -167,11 +189,10 @@ class NewstickrWindow(QtGui.QWidget):
 		self.message.addNews(text, url)
 
 	def clearNews(self):
-		self.message.clearNews()
+		self.message = NewsTickrMessage()
 
 	def buildLabel(self):
 		self.labelSize = self.message.buildLabel()
-		print "labelSize = " + str(self.labelSize)
 
 	@QtCore.pyqtSignature('update()')
 	def update(self):
