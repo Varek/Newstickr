@@ -30,9 +30,10 @@ class UpdateThread(Thread):
 	def finish(self):
 		self.isRunning = False
 
-class NewstickrWindow(QtGui.QLabel):
+class NewstickrWindow(QtGui.QWidget):
 	def __init__(self, parent=None):
 		QtGui.QWidget.__init__(self, parent)
+		self.setWindowFlags(QtCore.Qt.FramelessWindowHint | QtCore.Qt.WindowStaysOnTopHint)
 		self.setGeometry(0, 0, 400, 30)
 		self.setWindowTitle('Newstickr')
 		self.label = QtGui.QLabel(self)
@@ -42,6 +43,7 @@ class NewstickrWindow(QtGui.QLabel):
 	
 	def mousePressEvent(self, event):
 		print "clicked!"
+		self.close()
 
 	def resizeEvent(self, event):
 		geo = self.geometry()
