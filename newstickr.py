@@ -3,7 +3,7 @@
 import os
 import sys
 import time
-from PyQt4 import QtGui, QtCore
+from PyQt4 import QtGui, QtCore, Qt
 
 
 
@@ -17,6 +17,9 @@ class Config:
 	width = 800
 	updateInterval = 10
 	browser = 'chromium-browser'
+	useBlogSearch = True
+	useNewsSearch = True
+	useTwitter = True
 
 
 
@@ -26,16 +29,20 @@ class NTSettingsDialog(QtGui.QDialog):
 		self.setWindowTitle('Settings')
 		self.setModal(True)
 		self.textEdits = []
+		self.checkBoxes = []
+		self.yPos = 0
 		for i in range(len(Config.tagLines)):
 			self.initTagLine(i)
+		self.displaySourceOptions()
 		acceptButton = QtGui.QPushButton(self)
 		cancelButton = QtGui.QPushButton(self)
-		acceptButton.setGeometry(0, Config.numTagLines * Config.vspace, 100, 30)	
-		cancelButton.setGeometry(110, Config.numTagLines * Config.vspace, 100, 30)	
+		acceptButton.setGeometry(0, self.yPos, 100, 30)	
+		cancelButton.setGeometry(110, self.yPos, 100, 30)	
 		acceptButton.setText('OK')
 		cancelButton.setText('Cancel')
 		self.connect(cancelButton, QtCore.SIGNAL('clicked()'), lambda: self.close())
 		self.connect(acceptButton, QtCore.SIGNAL('clicked()'), lambda: self.accept())
+		self.yPos += Config.vspace
 
 	def initTagLine(self, anInteger):
 		
@@ -46,6 +53,21 @@ class NTSettingsDialog(QtGui.QDialog):
 		edit.setGeometry(100, Config.vspace * anInteger, 200, Config.vspace)
 		edit.setText(Config.tagLines[anInteger])
 		self.textEdits.append(edit)
+		self.yPos = Config.vspace * (anInteger + 1)
+
+	def displaySourceOptions(self):
+		self.displaySourceOption(Config.useBlogSearch, 'Google Blog Search')
+		self.displaySourceOption(Config.useNewsSearch, 'Google News Search')
+		self.displaySourceOption(Config.useTwitter, 'Twitter')
+
+	def displaySourceOption(self, checked, string):
+		cb = QtGui.QCheckBox(self)
+		cb.setText(string)
+		if checked:
+			cb.setCheckState(2)
+		cb.setGeometry(0, self.yPos, 300, Config.vspace)
+		self.yPos += Config.vspace
+		self.checkBoxes.append(cb)
 
 	def accept(self):
 		for line in Config.tagLines:
@@ -54,7 +76,16 @@ class NTSettingsDialog(QtGui.QDialog):
 		for edit in self.textEdits:
 			Config.tagLines[i] = edit.toPlainText()
 			i += 1
+		Config.useBlogSearch = self.configSource(0)
+		Config.useNewsSearch = self.configSource(1)
+		Config.useTwitter = self.configSource(2)
 		self.close()
+
+	def configSource(self, cbIndex):
+		if self.checkBoxes[cbIndex].isChecked():
+			return True
+		else:
+			return False
 		
 
 		
@@ -172,7 +203,6 @@ class NewsTickrMessage(QtGui.QWidget):
 		self.sizeInPixels = 0
 		for label in self.newsLabels:
 			label.show()
-			print "label!! " + label.text()
 			label.setGeometry(self.sizeInPixels, 0, len(label.text())*3, self.height())
 			self.sizeInPixels += label.width() + 30
 		self.show()
