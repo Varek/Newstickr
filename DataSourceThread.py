@@ -15,17 +15,21 @@ class DataSourceThread(QtCore.QThread):
 
 	def run(self):
 		while self.isRunning:
-			self.emit(QtCore.SIGNAL('clearNews()'))
 			tLines = []
 			for line in Config.tagLines:
 				if line != '':
 					tLines.append(line)
 			combinedSearch = CombinedSearch(tLines)
-
-			combinedSearch.search()
-			for field in combinedSearch.combinedSearchResults:
-				self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
-			self.emit(QtCore.SIGNAL('buildLabel()'))
+	
+			try:
+				combinedSearch.search()
+				self.emit(QtCore.SIGNAL('clearNews()'))
+				if Config.useTwitter:
+					for field in combinedSearch.searchResultsArray[0]:
+						self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
+				self.emit(QtCore.SIGNAL('buildLabel()'))
+			except (Exception):
+				pass
 			time.sleep(Config.updateInterval)
 			
 
