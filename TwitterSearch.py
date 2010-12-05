@@ -94,10 +94,11 @@ class CombinedSearch(object):
 		
 		
 		
-tag = CombinedSearch(['rhok nyc', 'berlin'])
-tag.search()
-#print tag.TwitterSearches
-#print tag.searchResultsArray
+if __name__ == '__main__':
+	tag = CombinedSearch(['rhok nyc', 'berlin'])
+	tag.search()
+	#print tag.TwitterSearches
+	#print tag.searchResultsArray
 
 	
 	

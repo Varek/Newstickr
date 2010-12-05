@@ -1,5 +1,6 @@
 from PyQt4 import Qt, QtCore, QtGui
 from Config import Config
+from TwitterSearch import CombinedSearch
 import time
 
 class DataSourceThread(QtCore.QThread):
@@ -14,11 +15,16 @@ class DataSourceThread(QtCore.QThread):
 
 	def run(self):
 		while self.isRunning:
-			print "updating"
 			self.emit(QtCore.SIGNAL('clearNews()'))
-			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Google', 'http://www.google.com')
-			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Twitter', 'http://www.twitter.com')
-			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeryyyyyyyyyyyyy loooooooooooooooooooooooooooooooonnnnnnnnnnnnnngggggggggggggggggggggggg tteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtttttttttttttttttt', 'http://www.twitter.com')
+			tLines = []
+			for line in Config.tagLines:
+				if line != '':
+					tLines.append(line)
+			combinedSearch = CombinedSearch(tLines)
+
+			combinedSearch.search()
+			for field in combinedSearch.combinedSearchResults:
+				self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
 			self.emit(QtCore.SIGNAL('buildLabel()'))
 			time.sleep(Config.updateInterval)
 			

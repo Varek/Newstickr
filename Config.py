@@ -3,10 +3,10 @@ class Config:
 	accel = 20
 	iconName = 'newstickr.xpm'
 	numTagLines = 3
-	tagLines = ['', '', '']
+	tagLines = ['rhok nyc', 'berlin', '']
 	vspace = 30
 	width = 800
-	updateInterval = 10
+	updateInterval = 60
 	browser = 'chromium-browser'
 	useBlogSearch = True
 	useNewsSearch = True
