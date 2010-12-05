@@ -7,7 +7,7 @@ import urllib
 import feedparser
 
 BLOG_SEARCH_HOST="http://blogsearch.google.com/blogsearch_feeds?hl=de&"
-BLOG_SEARCH_PATH_AFTER="&lr=&ie=utf-8&num=20&output=atom"
+BLOG_SEARCH_PATH_AFTER="&lr=&ie=utf-8&num=5&output=atom"
 NEWS_SEARCH_HOST="news.google.com/news?"
 NEWS_SEARCH_PATH_AFTER="&output=rss"
  
@@ -18,11 +18,12 @@ class GoogleCrawler(object):
     since_id is not always reliable, and so we probably want to de-dup ourselves
     at some level '''
  
-    def __init__(tag,type):
+    def __init__(self, tag, t):
         self.tag = tag
+        self.t = t
  
     def search(self):
-    	if type=="NEWS":
+    	if self.t == "NEWS":
     		path = NEWS_SEARCH_HOST + 'q=' + self.tag + NEWS_SEARCH_PATH_AFTER
     	else:
         	path = BLOG_SEARCH_HOST + 'q=' + self.tag + BLOG_SEARCH_PATH_AFTER

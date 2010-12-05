@@ -2,6 +2,7 @@ import TagCrawler
 import GoogleCrawler
 from oauth import oauth
 from oauthtwitter import OAuthApi
+from Config import Config
 
 
 def authorize():
@@ -77,12 +78,16 @@ class CombinedSearch(object):
 		self.searches = []
 		for keywords in keywordArrays:
 			query = keywordsToQuery(keywords)
-			self.TwitterSearches.append(Twittersearch(keywords))
-			self.NewsSearches.append(GNewssearch(keywords))
-			self.BlogSearches.append(Blogsearch(keywords))
+			if Config.useTwitter:
+				print "twitwitwit"
+				self.TwitterSearches.append(Twittersearch(keywords))
+			if Config.useBlogSearch:
+				self.BlogSearches.append(Blogsearch(keywords))
+			if Config.useNewsSearch:
+				self.NewsSearches.append(GNewssearch(keywords))
 		self.searches.extend(self.TwitterSearches)
-		self.searches.extend(self.NewsSearches)
 		self.searches.extend(self.BlogSearches)
+		self.searches.extend(self.NewsSearches)
 		
 		
 	def search(self):
