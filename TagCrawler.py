@@ -27,6 +27,7 @@ class TagCrawler(object):
         if self.max_id is not None:
             params['since_id'] = self.max_id
             #params['geocode'] = "37.781157,-122.398720,1mi"
+            params['rpp'] = 1
         path = "%s?%s" %(SEARCH_PATH, urllib.urlencode(params))
         print path
         try:
@@ -60,8 +61,9 @@ class TagCrawler(object):
             time.sleep(float(self.interval))
  
     def submit(self, data):
-         status = twitter.Status.NewFromJsonDict(data[0])
-         print data[0]
-         print status
-         print status.GetStatusUrl()
+         res=[]
+         for date in data:
+            res.append(twitter.Status.NewFromJsonDict(date))
+         #print res
+         return res
 		 
