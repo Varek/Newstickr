@@ -6,8 +6,10 @@ import time
 import urllib
 import feedparser
 
-SEARCH_HOST="http://blogsearch.google.com/blogsearch_feeds?hl=de&"
-SEARCH_PATH_AFTER="&lr=&ie=utf-8&num=20&output=atom"
+BLOG_SEARCH_HOST="http://blogsearch.google.com/blogsearch_feeds?hl=de&"
+BLOG_SEARCH_PATH_AFTER="&lr=&ie=utf-8&num=20&output=atom"
+NEWS_SEARCH_HOST="news.google.com/news?"
+NEWS_SEARCH_PATH_AFTER="&output=rss"
  
  
 class GoogleCrawler(object):
@@ -16,11 +18,14 @@ class GoogleCrawler(object):
     since_id is not always reliable, and so we probably want to de-dup ourselves
     at some level '''
  
-    def __init__(tag):
+    def __init__(tag,type):
         self.tag = tag
  
     def search(self):
-        path = SEARCH_HOST + 'q=' + self.tag + SEARCH_PATH_AFTER
+    	if type=="NEWS":
+    		path = NEWS_SEARCH_HOST + 'q=' + self.tag + NEWS_SEARCH_PATH_AFTER
+    	else:
+        	path = BLOG_SEARCH_HOST + 'q=' + self.tag + BLOG_SEARCH_PATH_AFTER
         rssentries = feedparser.parse(path).entries
         res = []
         for ens in rssentries:

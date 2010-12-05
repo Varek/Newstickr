@@ -50,7 +50,7 @@ class GNewssearch(object):
 
 	def __init__(self, query=None):
 		self.query = query
-		self.crawler = GoogleCrawler.GoogleCrawler(self.query)
+		self.crawler = GoogleCrawler.GoogleCrawler(self.query,"NEWS")
 		self.results = None
 	
 	def search(self):
@@ -60,7 +60,7 @@ class Blogsearch(object):
 
 	def __init__(self, query=None):
 		self.query = query
-		self.crawler = TagCrawler.TagCrawler(100000000,self.query,10)
+		self.crawler = GoogleCrawler.GoogleCrawler(self.query,"BLOG")
 		self.results = None
 	
 	def search(self):
@@ -79,10 +79,10 @@ class CombinedSearch(object):
 			query = keywordsToQuery(keywords)
 			self.TwitterSearches.append(Twittersearch(keywords))
 			self.NewsSearches.append(GNewssearch(keywords))
-			#self.BlogSearches.append(Blogsearch(keywords))
+			self.BlogSearches.append(Blogsearch(keywords))
 		self.searches.extend(self.TwitterSearches)
 		self.searches.extend(self.NewsSearches)
-		#self.searches.extend(self.BlogSearches)
+		self.searches.extend(self.BlogSearches)
 		
 		
 	def search(self):
