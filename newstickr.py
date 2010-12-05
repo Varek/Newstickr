@@ -6,6 +6,7 @@ import time
 from PyQt4 import QtGui, QtCore, Qt
 from DataSourceThread import DataSourceThread
 from Config import Config
+import webbrowser
 
 
 class NTSettingsDialog(QtGui.QDialog):
@@ -125,8 +126,8 @@ class NewsLabel(QtGui.QLabel):
 		self.url = ''
 	
 	def mousePressEvent(self, event):
-		os.system(Config.browser + ' ' + str(self.url))
-
+		#os.system(Config.browser + ' ' + str(self.url))
+		webbrowser.open(str(self.url))
 
 
 

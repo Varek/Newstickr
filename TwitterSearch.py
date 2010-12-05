@@ -3,14 +3,10 @@ import GoogleCrawler
 from oauth import oauth
 from oauthtwitter import OAuthApi
 from Config import Config
-
-
+import oauth_keys
+	
 def authorize():
-	consumer_key = "KEKjQDvICVkstzgVsmiEHA"
-	consumer_secret = "uBWsy1mwWpXN4f7TgDnWJpYWn43FFv0gdVRVb3WWMI"
-	oauth_token = '222826358-YGWpuFgehEDb9pAuxWm7CGZKSLKdkEqi2Vnbj0fF'
-	oauth_token_secret = 'BwbyKqDAc37FKO21IMJEAGBUJOuZNN2Qpv4jOrfes'
-	return OAuthApi(consumer_key, consumer_secret, oauth_token, oauth_token_secret)
+	return OAuthApi(oauth_keys.consumer_key, oauth_keys.consumer_secret, oauth_keys.oauth_token, oauth_keys.oauth_token_secret)
 	
 def retweetCount(oAuth, status_id):
 	print oAuth
@@ -20,8 +16,6 @@ def retweetCount(oAuth, status_id):
 	retweets = oAuth.ApiCall(callurl)
 	print retweets
 	return len(retweets)
-	
-
 # Retweet counting
 #twitter = authorize()
 #user_timeline = twitter.GetHomeTimeline()
