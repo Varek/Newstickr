@@ -16,6 +16,7 @@ class Config:
 	tagLines = ['', '', '']
 	vspace = 30
 	width = 800
+	updateInterval = 10
 	browser = 'chromium-browser'
 
 
@@ -75,6 +76,23 @@ class TrayIcon(QtGui.QSystemTrayIcon):
 		dialog.exec_()
 
 
+
+
+class DataSourceThread(QtCore.QThread):
+	def __init__(self, messageWidget):
+		QtCore.QThread.__init__(self)
+		self.messageWidget = messageWidget
+		self.isRunning = True
+
+	def run(self):
+		while self.isRunning:
+			time.sleep(Config.updateInterval)
+			print "updating ..."
+
+	def finish(self):
+		self.isRunning = False
+
+	
 
 
 class UpdateThread(QtCore.QThread):
@@ -162,6 +180,8 @@ class NewstickrWindow(QtGui.QWidget):
 		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('rotated()'), self, QtCore.SLOT('update()'))
 		QtCore.QObject.connect(self, QtCore.SIGNAL('rotating(bool)'), self.updateThread, QtCore.SLOT('setRotating(bool)'))
 		self.updateThread.start()
+		self.dataSourceThread = DataSourceThread(self)
+		self.dataSourceThread.start()
 	
 	#def mousePressEvent(self, event):
 	#	print "clicked!"
@@ -176,6 +196,7 @@ class NewstickrWindow(QtGui.QWidget):
 
 	def closeEvent(self, event):
 		self.updateThread.finish()
+		self.dataSourceThread.finish()
 		time.sleep(0.2)
 		event.accept()
 
