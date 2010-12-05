@@ -37,36 +37,67 @@ def keywordsToQuery(keywords):
 	
 class Twittersearch(object):
 
-	def __init__(self, keywords=None):
-		self.query = keywordsToQuery(keywords)
+	def __init__(self, query=None):
+		self.query = query
+		self.crawler = TagCrawler.TagCrawler(100000000,self.query,10)
+		self.results = None
+	
+	def search(self):
+		self.results = self.crawler.search()
+
+class GNewssearch(object):
+
+	def __init__(self, query=None):
+		self.query = query
 		self.crawler = TagCrawler.TagCrawler(100000000,self.query,10)
 		self.results = None
 	
 	def search(self):
 		self.results = self.crawler.search()
 		
-class CombinedTwittersearch(object):
+class Blogsearch(object):
+
+	def __init__(self, query=None):
+		self.query = query
+		self.crawler = TagCrawler.TagCrawler(100000000,self.query,10)
+		self.results = None
+	
+	def search(self):
+		self.results = self.crawler.search()
+		
+class CombinedSearch(object):
 	
 	def __init__(self, keywordArrays):
 		self.searchResultsArray = []
 		self.combinedSearchResults = []
 		self.TwitterSearches = []
+		self.NewsSearches = []
+		self.BlogSearches = []
+		self.searches = []
 		for keywords in keywordArrays:
+			query = keywordsToQuery(keywords)
 			self.TwitterSearches.append(Twittersearch(keywords))
+			#self.NewsSearches.append(GNewssearch(keywords))
+			#self.BlogSearches.append(Blogsearch(keywords))
+		self.searches.extend(self.TwitterSearches)
+		#self.searches.extend(self.NewsSearches)
+		#self.searches.extend(self.BlogSearches)
+		
 		
 	def search(self):
-		for ts in self.TwitterSearches:
-			ts.search()
-			self.searchResultsArray.append(ts.results)
+		for s in self.searches:
+			s.search()
+			self.searchResultsArray.append(s.results)
+			self.combinedSearchResults.extend(s.results)
 			#print ts.results
 		
 		
 		
-tag = CombinedTwittersearch(['rhok nyc', 'berlin'])
+		
+tag = CombinedSearch(['rhok nyc', 'berlin'])
 tag.search()
 #print tag.TwitterSearches
 #print tag.searchResultsArray
-
 
 	
 	

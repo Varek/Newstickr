@@ -114,6 +114,7 @@ class Status(object):
     self.truncated = truncated
     self.source = source
     self.geo = geo
+    self.url = self.GetStatusUrl
 
   def GetGeo(self):
     '''Get the geo location this status message was posted.
@@ -425,7 +426,16 @@ class Status(object):
        geoTemp=data.get('geo',None).get('coordinates',None)
     else:
        geoTemp = None
-       
+    
+    import time, datetime
+     
+    
+    timestring = data.get('created_at', None)
+    print timestring
+    time_format = "%a, %d %b %Y  %H:%M:%S "
+    #print datetime.datetime.fromtimestamp(time.mktime(time.strptime(timestring, time_format)))
+
+
     return Status(created_at=data.get('created_at', None),
                   favorited=data.get('favorited', None),
                   id=data.get('id', None),
@@ -942,7 +952,7 @@ class User(object):
       A twitter.User instance
     '''
     if 'status' in data:
-      status = Status.NewFromJsonDict(data['status'])
+      status = None #Status.NewFromJsonDict(data['status'])
     else:
       status = None
     return User(id=data.get('id', None),
