@@ -24,10 +24,11 @@ class DataSourceThread(QtCore.QThread):
 			try:
 				combinedSearch.search()
 				self.emit(QtCore.SIGNAL('clearNews()'))
-				for field in combinedSearch.combinedSearchResults:
-					self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
+				if Config.useTwitter:
+					for field in combinedSearch.searchResultsArray[0]:
+						self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
 				self.emit(QtCore.SIGNAL('buildLabel()'))
-			except (Exception, Error):
+			except (Exception):
 				pass
 			time.sleep(Config.updateInterval)
 			
