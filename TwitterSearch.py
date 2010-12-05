@@ -1,4 +1,5 @@
 import TagCrawler
+import GoogleCrawler
 from oauth import oauth
 from oauthtwitter import OAuthApi
 
@@ -49,7 +50,7 @@ class GNewssearch(object):
 
 	def __init__(self, query=None):
 		self.query = query
-		self.crawler = TagCrawler.TagCrawler(100000000,self.query,10)
+		self.crawler = GoogleCrawler.GoogleCrawler(self.query)
 		self.results = None
 	
 	def search(self):
@@ -77,10 +78,10 @@ class CombinedSearch(object):
 		for keywords in keywordArrays:
 			query = keywordsToQuery(keywords)
 			self.TwitterSearches.append(Twittersearch(keywords))
-			#self.NewsSearches.append(GNewssearch(keywords))
+			self.NewsSearches.append(GNewssearch(keywords))
 			#self.BlogSearches.append(Blogsearch(keywords))
 		self.searches.extend(self.TwitterSearches)
-		#self.searches.extend(self.NewsSearches)
+		self.searches.extend(self.NewsSearches)
 		#self.searches.extend(self.BlogSearches)
 		
 		
