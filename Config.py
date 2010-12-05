@@ -3,7 +3,7 @@ class Config:
 	accel = 20
 	iconName = 'newstickr.xpm'
 	numTagLines = 3
-	tagLines = ['jerusalem', 'berlin', '']
+	tagLines = ['jerusalem', 'berlin', 'new york']
 	vspace = 30
 	width = 800
 	updateInterval = 60
