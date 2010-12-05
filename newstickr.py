@@ -8,7 +8,6 @@ from PyQt4 import QtGui, QtCore
 
 
 class Config:
-	SampleText = '<a href="http://www.twitter.com/">Twitter!</a> +++ Laufschrift Newsticker +++ Lorem ipsum Newstickerum +++ tick tick tack +++ fooooooo +++ Erdbeben +++ Dinosaurier +++ Taliban +++ Katastrophe +++ '
 	speed = 0.1
 	accel = 20
 	iconName = 'newstickr.xpm'
@@ -79,15 +78,24 @@ class TrayIcon(QtGui.QSystemTrayIcon):
 
 
 class DataSourceThread(QtCore.QThread):
-	def __init__(self, messageWidget):
+	def __init__(self, messageWindow):
 		QtCore.QThread.__init__(self)
-		self.messageWidget = messageWidget
+		self.messageWindow = messageWindow
 		self.isRunning = True
+		QtCore.QObject.connect(self, QtCore.SIGNAL('clearNews()'), self.messageWindow, QtCore.SLOT('clearNews()'))
+		QtCore.QObject.connect(self, QtCore.SIGNAL('addNews(QString, QString)'), self.messageWindow, QtCore.SLOT('addNews(QString, QString)'))
+		QtCore.QObject.connect(self, QtCore.SIGNAL('buildLabel()'), self.messageWindow, QtCore.SLOT('buildLabel()'))
+		
 
 	def run(self):
 		while self.isRunning:
+			self.emit(QtCore.SIGNAL('clearNews()'))
+			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Google', 'http://www.google.com')
+			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Twitter', 'http://www.twitter.com')
+			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeryyyyyyyyyyyyy loooooooooooooooooooooooooooooooonnnnnnnnnnnnnngggggggggggggggggggggggg tteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtttttttttttttttttt', 'http://www.twitter.com')
+			self.emit(QtCore.SIGNAL('buildLabel()'))
 			time.sleep(Config.updateInterval)
-			print "updating ..."
+			
 
 	def finish(self):
 		self.isRunning = False
@@ -99,7 +107,6 @@ class UpdateThread(QtCore.QThread):
 	def __init__(self, label):
 		QtCore.QThread.__init__(self, label)
 		self.label = label
-		self.text = Config.SampleText
 		self.isRunning = True
 		self.isRotating = True
 
@@ -128,7 +135,7 @@ class NewsLabel(QtGui.QLabel):
 		self.url = ''
 	
 	def mousePressEvent(self, event):
-		os.system(Config.browser + ' ' + self.url)
+		os.system(Config.browser + ' ' + str(self.url))
 
 
 
@@ -139,6 +146,7 @@ class NewsTickrMessage(QtGui.QWidget):
 		self.newsLabels = []
 		self.sizeInPixels = 0
 
+	@QtCore.pyqtSignature('addNews(QString, QString)')
 	def addNews(self, text, url):
 		label = NewsLabel(self)
 		htmlText = '<qt>'
@@ -152,16 +160,22 @@ class NewsTickrMessage(QtGui.QWidget):
 		label.url = url
 		self.newsLabels.append(label)
 	
+	@QtCore.pyqtSignature('clearNews()')
 	def clearNews(self):
 		for item in self.newsLabels:
 			item.hide()
 			item.destroy()
+		self.newsLabels = []
 
+	@QtCore.pyqtSignature('buildLabel()')
 	def buildLabel(self):
 		self.sizeInPixels = 0
 		for label in self.newsLabels:
-			label.setGeometry(self.sizeInPixels, 0, len(label.text())*3, label.height())
+			label.show()
+			print "label!! " + label.text()
+			label.setGeometry(self.sizeInPixels, 0, len(label.text())*3, self.height())
 			self.sizeInPixels += label.width() + 30
+		self.show()
 		return self.sizeInPixels 
 	
 
@@ -180,19 +194,14 @@ class NewstickrWindow(QtGui.QWidget):
 		QtCore.QObject.connect(self.updateThread, QtCore.SIGNAL('rotated()'), self, QtCore.SLOT('update()'))
 		QtCore.QObject.connect(self, QtCore.SIGNAL('rotating(bool)'), self.updateThread, QtCore.SLOT('setRotating(bool)'))
 		self.updateThread.start()
-		self.dataSourceThread = DataSourceThread(self)
+		self.dataSourceThread = DataSourceThread(self.message)
 		self.dataSourceThread.start()
 	
-	#def mousePressEvent(self, event):
-	#	print "clicked!"
 
 	def resizeEvent(self, event):
 		geo = self.geometry()
 		self.message.setGeometry(0, 0, geo.width(), geo.height())
 
-	@QtCore.pyqtSignature('setText(QString)')
-	def setText(self, aString):
-		self.label.setText(aString)
 
 	def closeEvent(self, event):
 		self.updateThread.finish()
@@ -206,22 +215,14 @@ class NewstickrWindow(QtGui.QWidget):
 	def leaveEvent(self, event):
 		self.emit(QtCore.SIGNAL('rotating(bool)'), True)
 
-	def addNews(self, text, url):
-		self.message.addNews(text, url)
-
-	def clearNews(self):
-		self.message = NewsTickrMessage()
-
-	def buildLabel(self):
-		self.labelSize = self.message.buildLabel()
 
 	@QtCore.pyqtSignature('update()')
 	def update(self):
 		self.message.show()
 		self.ticks += 1
 		newX = Config.width - self.ticks * Config.accel
-		self.message.setGeometry(newX, 0, self.message.width(), self.message.height())
-		if newX < -self.labelSize:
+		self.message.setGeometry(newX, 0, self.message.sizeInPixels, self.message.height())
+		if newX < -self.message.sizeInPixels:
 			self.ticks = 0
 			
 			
@@ -236,15 +237,10 @@ Config.width = desktop.width()
 
 newstickr = NewstickrWindow(desktop.width(), desktop.height())
 
-newstickr.addNews('Google', 'http://www.google.com')
-newstickr.addNews('Twitter', 'http://www.twitter.com')
-newstickr.addNews('Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeryyyyyyyyyyyyy loooooooooooooooooooooooooooooooonnnnnnnnnnnnnngggggggggggggggggggggggg tteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtttttttttttttttttt', 'http://www.twitter.com')
-newstickr.addNews('Twitter', 'http://www.twitter.com')
-newstickr.buildLabel()
-newstickr.show()
 
 trayIcon = TrayIcon(QtGui.QIcon(Config.iconName), newstickr)
 trayIcon.show()
+newstickr.show()
 
 sys.exit(app.exec_())
 
