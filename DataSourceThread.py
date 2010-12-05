@@ -21,11 +21,14 @@ class DataSourceThread(QtCore.QThread):
 				if line != '':
 					tLines.append(line)
 			combinedSearch = CombinedSearch(tLines)
-
-			combinedSearch.search()
-			for field in combinedSearch.combinedSearchResults:
-				self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
-			self.emit(QtCore.SIGNAL('buildLabel()'))
+	
+			try:
+				combinedSearch.search()
+				for field in combinedSearch.combinedSearchResults:
+					self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
+				self.emit(QtCore.SIGNAL('buildLabel()'))
+			except (Exception, Error):
+				pass
 			time.sleep(Config.updateInterval)
 			
 
