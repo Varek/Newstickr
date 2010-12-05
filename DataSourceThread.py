@@ -35,7 +35,8 @@ class DataSourceThread(QtCore.QThread):
 				if Config.useNewsSearch:
 					print "using news search"
 					for field in combinedSearch.searchResultsArray[2]:
-						self.emit(QtCore.SIGNAL('buildLabel()'))
+						self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field[0], field[1])
+				self.emit(QtCore.SIGNAL('buildLabel()'))
 			except (Exception):
 				pass
 			time.sleep(Config.updateInterval)
