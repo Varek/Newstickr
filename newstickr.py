@@ -4,23 +4,8 @@ import os
 import sys
 import time
 from PyQt4 import QtGui, QtCore, Qt
-
-
-
-class Config:
-	speed = 0.1
-	accel = 20
-	iconName = 'newstickr.xpm'
-	numTagLines = 3
-	tagLines = ['', '', '']
-	vspace = 30
-	width = 800
-	updateInterval = 10
-	browser = 'chromium-browser'
-	useBlogSearch = True
-	useNewsSearch = True
-	useTwitter = True
-
+from DataSourceThread import DataSourceThread
+from Config import Config
 
 
 class NTSettingsDialog(QtGui.QDialog):
@@ -104,32 +89,6 @@ class TrayIcon(QtGui.QSystemTrayIcon):
 		dialog = NTSettingsDialog()
 		dialog.show()
 		dialog.exec_()
-
-
-
-
-class DataSourceThread(QtCore.QThread):
-	def __init__(self, messageWindow):
-		QtCore.QThread.__init__(self)
-		self.messageWindow = messageWindow
-		self.isRunning = True
-		QtCore.QObject.connect(self, QtCore.SIGNAL('clearNews()'), self.messageWindow, QtCore.SLOT('clearNews()'))
-		QtCore.QObject.connect(self, QtCore.SIGNAL('addNews(QString, QString)'), self.messageWindow, QtCore.SLOT('addNews(QString, QString)'))
-		QtCore.QObject.connect(self, QtCore.SIGNAL('buildLabel()'), self.messageWindow, QtCore.SLOT('buildLabel()'))
-		
-
-	def run(self):
-		while self.isRunning:
-			self.emit(QtCore.SIGNAL('clearNews()'))
-			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Google', 'http://www.google.com')
-			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Twitter', 'http://www.twitter.com')
-			self.emit(QtCore.SIGNAL('addNews(QString, QString)'), 'Veeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeryyyyyyyyyyyyy loooooooooooooooooooooooooooooooonnnnnnnnnnnnnngggggggggggggggggggggggg tteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeexxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxtttttttttttttttttt', 'http://www.twitter.com')
-			self.emit(QtCore.SIGNAL('buildLabel()'))
-			time.sleep(Config.updateInterval)
-			
-
-	def finish(self):
-		self.isRunning = False
 
 	
 
