@@ -11,3 +11,4 @@ class Config:
 	useBlogSearch = True
 	useNewsSearch = True
 	useTwitter = True
+	rpp = 10

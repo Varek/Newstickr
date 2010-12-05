@@ -5,6 +5,7 @@ import socket
 import time
 import urllib
 import twitter
+from Config import Config
 
 SEARCH_HOST="search.twitter.com"
 SEARCH_PATH="/search.json"
@@ -27,7 +28,7 @@ class TagCrawler(object):
         if self.max_id is not None:
             params['since_id'] = self.max_id
             #params['geocode'] = "37.781157,-122.398720,1mi"
-            params['rpp'] = 1
+            params['rpp'] = Config.rpp
         path = "%s?%s" %(SEARCH_PATH, urllib.urlencode(params))
         print path
         try:
