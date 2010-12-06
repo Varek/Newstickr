@@ -24,18 +24,20 @@ class DataSourceThread(QtCore.QThread):
 			try:
 				combinedSearch.search()
 				self.emit(QtCore.SIGNAL('clearNews()'))
-				if Config.useTwitter:
-					print "using twitter"
-					for field in combinedSearch.searchResultsArray[0]:
-						self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
-				if Config.useBlogSearch:
-					print "using blog search"
-					for field in combinedSearch.searchResultsArray[1]:
-						self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field[0], field[1])
-				if Config.useNewsSearch:
-					print "using news search"
-					for field in combinedSearch.searchResultsArray[2]:
-						self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field[0], field[1])
+				for field in combinedSearch.combinedSearchResults:
+					self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field[0], field[1])
+				#if Config.useTwitter:
+				#	print "using twitter"
+				#	for field in combinedSearch.searchResultsArray[0]:
+				#		self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field.text, field.GetStatusUrl())
+				#if Config.useBlogSearch:
+				#	print "using blog search"
+				#	for field in combinedSearch.searchResultsArray[1]:
+				#		self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field[0], field[1])
+				#if Config.useNewsSearch:
+				#	print "using news search"
+				#	for field in combinedSearch.searchResultsArray[2]:
+				#		self.emit(QtCore.SIGNAL('addNews(QString, QString)'), field[0], field[1])
 				self.emit(QtCore.SIGNAL('buildLabel()'))
 			except (Exception):
 				pass

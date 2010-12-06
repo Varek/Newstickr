@@ -70,26 +70,37 @@ class CombinedSearch(object):
 		self.NewsSearches = []
 		self.BlogSearches = []
 		self.searches = []
+		self.TwitterSearchResults = []
+		self.NewsSearchResults = []
+		self.BlogSearchResults = []
+		self.SearchesByTopic = []
+		ts = bs = ns = None
 		for keywords in keywordArrays:
 			query = keywordsToQuery(keywords)
 			if Config.useTwitter:
 				print "twitwitwit"
-				self.TwitterSearches.append(Twittersearch(keywords))
+				ts = Twittersearch(query)
+				self.TwitterSearches.append(ts)
 			if Config.useBlogSearch:
-				self.BlogSearches.append(Blogsearch(keywords))
+				bs = Blogsearch(query)
+				self.BlogSearches.append(bs)
 			if Config.useNewsSearch:
-				self.NewsSearches.append(GNewssearch(keywords))
-		self.searches.extend(self.TwitterSearches)
-		self.searches.extend(self.BlogSearches)
-		self.searches.extend(self.NewsSearches)
+				ns = GNewssearch(query)
+				self.NewsSearches.append(ns)
+			for s in [ts,bs,ns]:
+				self.SearchesByTopic.append(s)
+		self.searches.append(self.TwitterSearches)
+		self.searches.append(self.BlogSearches)
+		self.searches.append(self.NewsSearches)
 		
 		
 	def search(self):
-		for s in self.searches:
-			s.search()
-			self.searchResultsArray.append(s.results)
-			self.combinedSearchResults.extend(s.results)
-			#print ts.results
+		for st in self.searches:
+			for s in st:
+				s.search()
+				self.searchResultsArray.append(s.results)
+				self.combinedSearchResults.extend(s.results)
+				#print ts.results
 		
 		
 		

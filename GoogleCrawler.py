@@ -8,7 +8,7 @@ import feedparser
 
 BLOG_SEARCH_HOST="http://blogsearch.google.com/blogsearch_feeds?hl=de&"
 BLOG_SEARCH_PATH_AFTER="&lr=&ie=utf-8&num=5&output=atom"
-NEWS_SEARCH_HOST="news.google.com/news?"
+NEWS_SEARCH_HOST="http://news.google.com/news?"
 NEWS_SEARCH_PATH_AFTER="&num=5&output=atom"
  
  

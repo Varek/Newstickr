@@ -64,7 +64,8 @@ class TagCrawler(object):
     def submit(self, data):
          res=[]
          for date in data:
-            res.append(twitter.Status.NewFromJsonDict(date))
+            stat =  twitter.Status.NewFromJsonDict(date)
+            res.append([stat.text,stat.GetStatusURL()])
          #print res
          return res
 		 

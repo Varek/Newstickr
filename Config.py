@@ -9,6 +9,6 @@ class Config:
 	updateInterval = 60
 	browser = 'chromium-browser'
 	useBlogSearch = True 
-	useNewsSearch = False
+	useNewsSearch = True
 	useTwitter = False
 	rpp = 10
